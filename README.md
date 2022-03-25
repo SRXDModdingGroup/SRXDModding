@@ -1,5 +1,5 @@
 # SRXDModding
-Unity projected for creating asset bundles for SRXD mods
+Unity project for creating asset bundles for SRXD mods
 
 Requires Unity version 2021.2.9
 
