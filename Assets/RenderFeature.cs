@@ -3,11 +3,27 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
 public class RenderFeature : ScriptableRendererFeature {
+    [SerializeField] private Material[] materials;
+
+    private CustomRenderPass pass;
+
+    private static readonly int ASPECT = Shader.PropertyToID("_Aspect");
+
+    public override void Create() {
+        pass = new CustomRenderPass(materials);
+        pass.renderPassEvent = RenderPassEvent.AfterRenderingPostProcessing;
+    }
+
+    public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData) {
+        renderer.EnqueuePass(pass);
+    }
+
     class CustomRenderPass : ScriptableRenderPass {
         private RenderTargetIdentifier cameraColorTarget;
         private Material[] materials;
         private RenderTargetHandle tempTexture1;
         private RenderTargetHandle tempTexture2;
+        private float aspect;
 
         public CustomRenderPass(Material[] materials) {
             this.materials = materials;
@@ -17,12 +33,9 @@ public class RenderFeature : ScriptableRendererFeature {
 
         public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData) {
             cameraColorTarget = renderingData.cameraData.renderer.cameraColorTarget;
+            aspect = renderingData.cameraData.camera.aspect;
         }
 
-        // Here you can implement the rendering logic.
-        // Use <c>ScriptableRenderContext</c> to issue drawing commands or execute command buffers
-        // https://docs.unity3d.com/ScriptReference/Rendering.ScriptableRenderContext.html
-        // You don't have to call ScriptableRenderContext.submit, the render pipeline will call it at specific points in the pipeline.
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData) {
             var cmd = CommandBufferPool.Get("CustomRenderFeature");
             var descriptor = renderingData.cameraData.cameraTargetDescriptor;
@@ -35,8 +48,9 @@ public class RenderFeature : ScriptableRendererFeature {
             var source = tempTexture1.Identifier();
             var destination = tempTexture2.Identifier();
 
-            for (int i = 0; i < materials.Length; i++) {
-                Blit(cmd, source, destination, materials[i]);
+            foreach (var material in materials) {
+                material.SetFloat(ASPECT, aspect);
+                Blit(cmd, source, destination, material);
                 (source, destination) = (destination, source);
             }
 
@@ -49,24 +63,6 @@ public class RenderFeature : ScriptableRendererFeature {
             cmd.ReleaseTemporaryRT(tempTexture1.id);
             cmd.ReleaseTemporaryRT(tempTexture2.id);
         }
-    }
-
-    [SerializeField] private Material[] materials;
-
-    private CustomRenderPass pass;
-
-    /// <inheritdoc/>
-    public override void Create() {
-        pass = new CustomRenderPass(materials);
-
-        // Configures where the render pass should be injected.
-        pass.renderPassEvent = RenderPassEvent.AfterRenderingPostProcessing;
-    }
-
-    // Here you can inject one or multiple render passes in the renderer.
-    // This method is called when setting up the renderer once per-camera.
-    public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData) {
-        renderer.EnqueuePass(pass);
     }
 }
 

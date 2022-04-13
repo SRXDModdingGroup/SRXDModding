@@ -66,5 +66,4 @@ MonoBehaviour:
   m_Name: RenderFeature
   m_EditorClassIdentifier: 
   m_Active: 1
-  materials:
-  - {fileID: 2100000, guid: 6cae89d5f3e082a40bafb0ecd88526c9, type: 2}
+  materials: []

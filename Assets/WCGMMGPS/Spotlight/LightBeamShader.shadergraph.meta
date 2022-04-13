@@ -1,0 +1,10 @@
+fileFormatVersion: 2
+guid: 14d2a14e49ee68f4a909429e24c52863
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: wcgmmgps
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 625f186215c104763be7675aa2d941aa, type: 3}
